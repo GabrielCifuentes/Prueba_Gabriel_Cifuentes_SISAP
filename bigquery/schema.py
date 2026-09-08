@@ -64,6 +64,7 @@ TABLES = {
             SchemaField("other_ext_noncompliant", "INT64"),
             SchemaField("other_ext_pct", "FLOAT64"),
             SchemaField("other_ext_failing_list", "STRING"),
+            SchemaField("total_risk_reduction_usd", "FLOAT64"),
         ],
         "clustering_fields": ["assessment_id"],
     },
