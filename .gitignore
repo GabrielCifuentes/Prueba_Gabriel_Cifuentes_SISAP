@@ -19,9 +19,10 @@ venv/
 # Documento confidencial del caso (no debe ir a un repo publico)
 2026 - Programas - Evaluacion Practica - Automatizador-v1.pdf
 
-# Salidas generadas
+# Salidas generadas (los informes de muestra si se versionan, ver entregables/)
 reports/output/
 *.pdf
+!entregables/**/*.pdf
 
 # OS / editor
 .DS_Store
