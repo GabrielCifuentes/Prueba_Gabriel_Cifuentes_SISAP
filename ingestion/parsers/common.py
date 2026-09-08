@@ -59,6 +59,38 @@ def parse_report_date(text: Optional[str]):
     return None
 
 
+def parse_yes_no(text: Optional[str]) -> Optional[bool]:
+    """'Yes' -> True | 'No' -> False | '' / None -> None"""
+    if text is None:
+        return None
+    text = text.strip().lower()
+    if text == "yes":
+        return True
+    if text == "no":
+        return False
+    return None
+
+
+def parse_int_loose(text: Optional[str]) -> Optional[int]:
+    """'~7,399' -> 7399 | '' / 'N/A' -> None"""
+    if text is None:
+        return None
+    match = re.search(r"[\d,]+", text)
+    if not match:
+        return None
+    return int(match.group(0).replace(",", ""))
+
+
+def parse_float_loose(text: Optional[str]) -> Optional[float]:
+    """'~3.8 Years' -> 3.8 | '~20 Years' -> 20.0 | 'N/A' -> None"""
+    if text is None:
+        return None
+    match = re.search(r"[\d.]+", text)
+    if not match:
+        return None
+    return float(match.group(0))
+
+
 def parse_ranked_item(item: str):
     """'1. Deploy SPF, DKIM & DMARC (monitor to reject)' -> (1, 'Deploy SPF...')"""
     match = re.match(r"\s*(\d+)\.\s*(.+)", item)

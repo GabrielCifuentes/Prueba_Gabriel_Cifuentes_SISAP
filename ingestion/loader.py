@@ -222,3 +222,71 @@ def load_domain_account_review(
         summary_table="domain_account_review_summary",
         recommendations_table="domain_account_review_recommendations",
     )
+
+
+def load_external_vulnerability_assessment(
+    client: bigquery.Client,
+    findings: List[Dict[str, Any]],
+    aging_rows: List[Dict[str, Any]],
+    recommendations: List[Dict[str, Any]],
+    client_id: str,
+    client_name: str,
+    consultant_name: str,
+    findings_file: str,
+    aging_file: str,
+    recommendations_file: str,
+    report_date: Optional[dt.date] = None,
+) -> Dict[str, Any]:
+    """Carga los 3 archivos de Evaluacion de Vulnerabilidades Externas
+    (findings, aging analysis, top10 recommendations) como un solo
+    'assessment'. La combinacion de los 3 nombres de archivo identifica la
+    corrida para efectos de deteccion de reimportacion."""
+    activity_type = "external_vulnerability_assessment"
+    source_file = "+".join(sorted([findings_file, aging_file, recommendations_file]))
+
+    started_at = _now()
+    batch_id = str(uuid.uuid4())
+
+    ensure_client(client, client_id, client_name)
+    _remove_previous_load(client, client_id, activity_type, source_file)
+
+    assessment_id = str(uuid.uuid4())
+    assessment_row = {
+        "assessment_id": assessment_id,
+        "client_id": client_id,
+        "activity_type": activity_type,
+        "consultant_name": consultant_name,
+        "profile_name": None,
+        "report_date": report_date.isoformat() if report_date else None,
+        "source_file": source_file,
+        "load_batch_id": batch_id,
+        "created_at": started_at.isoformat(),
+    }
+    _load_json_rows(client, "assessments", [assessment_row])
+
+    findings_rows = [{"assessment_id": assessment_id, **row} for row in findings]
+    aging_full_rows = [{"assessment_id": assessment_id, **row} for row in aging_rows]
+    rec_rows = [{"assessment_id": assessment_id, **row} for row in recommendations]
+
+    _load_json_rows(client, "eva_findings", findings_rows)
+    _load_json_rows(client, "eva_vulnerability_aging", aging_full_rows)
+    _load_json_rows(client, "eva_top10_recommendations", rec_rows)
+
+    finished_at = _now()
+    rows_loaded = len(findings_rows) + len(aging_full_rows) + len(rec_rows) + 1
+    batch_row = {
+        "batch_id": batch_id,
+        "client_id": client_id,
+        "activity_type": activity_type,
+        "source_file": source_file,
+        "load_mode": "overwrite",
+        "rows_read": rows_loaded,
+        "rows_loaded": rows_loaded,
+        "rows_rejected": 0,
+        "status": "success",
+        "started_at": started_at.isoformat(),
+        "finished_at": finished_at.isoformat(),
+    }
+    _load_json_rows(client, "load_batches", [batch_row])
+
+    return {"assessment_id": assessment_id, "batch_id": batch_id, "rows_loaded": rows_loaded}

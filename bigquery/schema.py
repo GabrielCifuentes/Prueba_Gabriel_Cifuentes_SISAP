@@ -36,7 +36,6 @@ TABLES = {
             SchemaField("load_batch_id", "STRING"),
             SchemaField("created_at", "TIMESTAMP", mode="REQUIRED"),
         ],
-        "time_partitioning": {"field": "report_date", "type_": "MONTH"},
         "clustering_fields": ["client_id", "activity_type"],
     },
     "email_filter_check_summary": {
@@ -137,7 +136,6 @@ TABLES = {
             SchemaField("cis76_implementation_pct", "FLOAT64"),
             SchemaField("external_vm_risk_level", "STRING"),
         ],
-        "time_partitioning": {"field": "scan_date", "type_": "MONTH"},
         "clustering_fields": ["assessment_id", "adjusted_severity"],
     },
     "eva_vulnerability_aging": {
@@ -166,7 +164,6 @@ TABLES = {
             SchemaField("exploit_available", "BOOL"),
             SchemaField("remediation_priority", "STRING"),
         ],
-        "time_partitioning": {"field": "scan_date", "type_": "MONTH"},
         "clustering_fields": ["assessment_id", "remediation_priority"],
     },
     "eva_top10_recommendations": {
@@ -206,7 +203,6 @@ TABLES = {
             SchemaField("started_at", "TIMESTAMP"),
             SchemaField("finished_at", "TIMESTAMP"),
         ],
-        "time_partitioning": {"field": "started_at", "type_": "MONTH"},
     },
     "rejected_rows": {
         "schema": [
@@ -218,6 +214,5 @@ TABLES = {
             SchemaField("validation_error", "STRING"),
             SchemaField("rejected_at", "TIMESTAMP"),
         ],
-        "time_partitioning": {"field": "rejected_at", "type_": "MONTH"},
     },
 }
