@@ -26,11 +26,24 @@ def _read_rows(file_path: str):
 def parse(file_path: str) -> Dict[str, Any]:
     raw_rows, encoding = _read_rows(file_path)
     rows: List[Dict[str, Any]] = []
+    rejected: List[Dict[str, Any]] = []
 
-    for row in raw_rows:
+    for row_number, row in enumerate(raw_rows, start=2):  # fila 1 es el encabezado
         rank_text = (row.get("Rank") or "").strip()
+        recommendation = (row.get("Recommendation") or "").strip()
+
+        errors = []
+        if not rank_text.isdigit():
+            errors.append(f"Rank invalido: '{rank_text}'")
+        if not recommendation:
+            errors.append("Recommendation vacio")
+
+        if errors:
+            rejected.append({"row_number": row_number, "raw_row": row, "validation_error": "; ".join(errors)})
+            continue
+
         rows.append({
-            "rank": int(rank_text) if rank_text.isdigit() else None,
+            "rank": int(rank_text),
             "severity_addressed": row.get("Severity_Addressed", "").strip(),
             "recommendation": row.get("Recommendation", "").strip(),
             "description": row.get("Description", "").strip(),
@@ -49,4 +62,4 @@ def parse(file_path: str) -> Dict[str, Any]:
             "remediation_timeline": row.get("Remediation_Timeline", "").strip(),
         })
 
-    return {"encoding_used": encoding, "recommendations": rows}
+    return {"encoding_used": encoding, "recommendations": rows, "rejected": rejected}

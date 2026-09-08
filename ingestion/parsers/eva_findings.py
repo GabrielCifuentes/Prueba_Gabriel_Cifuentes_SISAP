@@ -21,8 +21,25 @@ def _read_rows(file_path: str):
 def parse(file_path: str) -> Dict[str, Any]:
     raw_rows, encoding = _read_rows(file_path)
     findings: List[Dict[str, Any]] = []
+    rejected: List[Dict[str, Any]] = []
 
-    for row in raw_rows:
+    for row_number, row in enumerate(raw_rows, start=2):  # fila 1 es el encabezado
+        host_ip = (row.get("Host_IP") or "").strip()
+        vulnerability_name = (row.get("Vulnerability_Name") or "").strip()
+        scan_date = parse_report_date(row.get("Scan_Date"))
+
+        errors = []
+        if not host_ip:
+            errors.append("Host_IP vacio")
+        if not vulnerability_name:
+            errors.append("Vulnerability_Name vacio")
+        if row.get("Scan_Date") and not scan_date:
+            errors.append(f"Scan_Date invalida: '{row.get('Scan_Date')}'")
+
+        if errors:
+            rejected.append({"row_number": row_number, "raw_row": row, "validation_error": "; ".join(errors)})
+            continue
+
         findings.append({
             "host_ip": row.get("Host_IP", "").strip(),
             "host_name": row.get("Host_Name", "").strip(),
@@ -43,9 +60,9 @@ def parse(file_path: str) -> Dict[str, Any]:
             "protocol": row.get("Protocol", "").strip(),
             "service": row.get("Service", "").strip(),
             "port_classification": row.get("Port_Classification", "").strip(),
-            "scan_date": parse_report_date(row.get("Scan_Date")),
+            "scan_date": scan_date,
             "cis76_implementation_pct": parse_percent(row.get("CIS76_Implementation")),
             "external_vm_risk_level": row.get("External_VM_Risk_Level", "").strip(),
         })
 
-    return {"encoding_used": encoding, "findings": findings}
+    return {"encoding_used": encoding, "findings": findings, "rejected": rejected}

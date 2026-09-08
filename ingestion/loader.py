@@ -22,6 +22,7 @@ lo natural seria reemplazar esto por sentencias MERGE/DELETE.
 """
 
 import datetime as dt
+import json
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, List, Optional
@@ -81,6 +82,30 @@ def _rewrite_table_excluding(client: bigquery.Client, table_name: str, keep_pred
     existing = _read_all_rows(client, table_name)
     kept = [row for row in existing if keep_predicate(row)]
     _load_json_rows(client, table_name, kept, write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE)
+
+
+def _write_rejected_rows(
+    client: bigquery.Client,
+    batch_id: str,
+    client_id: str,
+    rejected_by_file: Dict[str, List[Dict[str, Any]]],
+) -> int:
+    """Guarda en 'rejected_rows' las filas que no pasaron validacion, con el
+    motivo, para poder consultarlas despues (requisito del caso)."""
+    rows = []
+    for source_file, items in rejected_by_file.items():
+        for item in items:
+            rows.append({
+                "batch_id": batch_id,
+                "client_id": client_id,
+                "source_file": source_file,
+                "row_number": item["row_number"],
+                "raw_row": json.dumps(item["raw_row"], ensure_ascii=False, default=str),
+                "validation_error": item["validation_error"],
+                "rejected_at": _now().isoformat(),
+            })
+    _load_json_rows(client, "rejected_rows", rows)
+    return len(rows)
 
 
 def ensure_client(client: bigquery.Client, client_id: str, client_name: str, vertical: Optional[str] = None) -> None:
@@ -236,6 +261,7 @@ def load_external_vulnerability_assessment(
     aging_file: str,
     recommendations_file: str,
     report_date: Optional[dt.date] = None,
+    rejected_by_file: Optional[Dict[str, List[Dict[str, Any]]]] = None,
 ) -> Dict[str, Any]:
     """Carga los 3 archivos de Evaluacion de Vulnerabilidades Externas
     (findings, aging analysis, top10 recommendations) como un solo
@@ -272,6 +298,8 @@ def load_external_vulnerability_assessment(
     _load_json_rows(client, "eva_vulnerability_aging", aging_full_rows)
     _load_json_rows(client, "eva_top10_recommendations", rec_rows)
 
+    rows_rejected = _write_rejected_rows(client, batch_id, client_id, rejected_by_file or {})
+
     finished_at = _now()
     rows_loaded = len(findings_rows) + len(aging_full_rows) + len(rec_rows) + 1
     batch_row = {
@@ -280,13 +308,13 @@ def load_external_vulnerability_assessment(
         "activity_type": activity_type,
         "source_file": source_file,
         "load_mode": "overwrite",
-        "rows_read": rows_loaded,
+        "rows_read": rows_loaded + rows_rejected,
         "rows_loaded": rows_loaded,
-        "rows_rejected": 0,
+        "rows_rejected": rows_rejected,
         "status": "success",
         "started_at": started_at.isoformat(),
         "finished_at": finished_at.isoformat(),
     }
     _load_json_rows(client, "load_batches", [batch_row])
 
-    return {"assessment_id": assessment_id, "batch_id": batch_id, "rows_loaded": rows_loaded}
+    return {"assessment_id": assessment_id, "batch_id": batch_id, "rows_loaded": rows_loaded, "rows_rejected": rows_rejected}
