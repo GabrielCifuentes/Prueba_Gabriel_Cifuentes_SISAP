@@ -158,6 +158,70 @@ duplicados) fue revisada y aprobada por mi antes de aplicarse.
 ## 8. Como generar los tableros e informes
 
 - **Looker Studio**: se conecta directo como fuente de datos de BigQuery al
-  dataset `sisap_ciberseguridad` (ver manual de uso).
+  dataset `sisap_ciberseguridad` (ver manual de uso). Looker Studio es
+  unicamente una herramienta de visualizacion: aunque tiene un conector de
+  "subir archivo", ese archivo queda almacenado dentro de Looker Studio como
+  fuente aislada y **no se inserta en BigQuery ni en ninguna base de datos**.
+  Por eso la carga de datos (validacion, deduplicacion, error-handling) vive
+  en la app de Streamlit, y Looker Studio solo lee lo que ya esta en
+  BigQuery -- son responsabilidades separadas a proposito, como en cualquier
+  arquitectura BI real.
 - **Informes PDF**: `python reports/generate_report.py --client <client_id>
   --activity all`. Genera un PDF por actividad en `reports/output/`.
+
+## 9. Seguridad de la app de ingesta y trabajo futuro
+
+La app de carga (`ingestion/app.py`) es adecuada para esta prueba/demo, pero
+tiene limitaciones conocidas si se quisiera usar en produccion con datos
+reales de clientes:
+
+**Lo que ya mitiga riesgos:**
+- Las credenciales de la cuenta de servicio nunca se versionan (excluidas
+  via `.gitignore`).
+- Todas las consultas parametrizadas (`bigquery.ScalarQueryParameter` /
+  `ArrayQueryParameter`), sin concatenar texto de usuario en SQL -> sin
+  riesgo de inyeccion SQL.
+- El contenido de los CSV solo se lee como datos (`csv.DictReader`), nunca
+  se ejecuta.
+- La app corre solo en localhost, no esta expuesta a internet.
+
+**Lo que falta para un entorno de produccion real:**
+- **Sin autenticacion**: cualquiera que abra la app puede cargar datos de
+  cualquier cliente; no hay control de acceso por consultor/cliente.
+- **Permisos de la cuenta de servicio demasiado amplios** ("BigQuery
+  Admin"); en produccion deberia acotarse a `BigQuery Data Editor` +
+  `BigQuery Job User`.
+- **Sin cifrado en transito** si se expusiera mas alla de localhost (habria
+  que servirla detras de HTTPS).
+
+**Alternativas gestionadas de Google/Microsoft para este mismo problema**
+(subir un archivo -> validarlo -> cargarlo a una base de datos), si se
+quisiera evitar mantener la app a mano:
+
+- **Cloud Run + Identity-Aware Proxy (IAP)** (Google): desplegar esta misma
+  app de Streamlit en Cloud Run, con IAP exigiendo login de Google antes de
+  dejar entrar a nadie. Es la opcion que mas conserva la logica de
+  validacion ya construida, solo le agrega autenticacion real sin escribir
+  codigo de login.
+- **AppSheet** (Google, incluido en Workspace): permite armar una app de
+  carga de datos con login de Google y permisos por usuario "sin codigo",
+  conectada a BigQuery. Mas rapido de configurar que programar una app,
+  pero menos flexible para la logica de validacion especifica de cada CSV
+  que ya tenemos (parsers por tipo de reporte, deteccion de encoding, etc.).
+- **Cloud Storage + Cloud Function/Cloud Run activada por evento**: los
+  consultores suben el CSV a una carpeta de Cloud Storage (con permisos de
+  Google Cloud IAM controlando quien puede subir), y una funcion se dispara
+  automaticamente para validarlo y cargarlo a BigQuery. Mas "serverless" y
+  con auditoria nativa (Cloud Audit Logs), pero sin interfaz de
+  previsualizacion como la que pide el caso.
+- **Herramientas de Microsoft** (Power Automate, Power BI dataflows):
+  tecnicamente podrian recibir el archivo (por ejemplo desde SharePoint) y
+  moverlo a alguna base de datos, pero como todo este proyecto esta
+  construido sobre BigQuery (no sobre Azure/SQL Server), mezclar
+  herramientas de Microsoft aqui agregaria complejidad entre nubes sin
+  ningun beneficio real -- no se recomienda para este caso.
+
+Para el alcance de esta prueba se opto por la app de Streamlit hecha a la
+medida (en vez de una de estas alternativas) porque el caso explicitamente
+evalua "el control del desarrollador" sobre la logica de ingesta y
+validacion, algo que una herramienta low-code como AppSheet abstraeria.
