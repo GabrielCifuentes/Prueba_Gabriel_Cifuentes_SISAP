@@ -1,0 +1,76 @@
+Section,Item,Value,Detail
+,Report name,Domain Account Review Report,
+,Profile name,Pruebas,
+,Report date,19/08/2026,
+,Execution date,18/02/2026,
+,Total exposure,$29m,Median cyber risk
+,Domain Account Review risk rating,Extremely High,Driven by 4 generic accounts
+,Number of accounts evaluated,51,
+,Accounts with passwords that do not expire,5,All in disabled accounts
+,Accounts that do not require a password,2,All in disabled accounts
+,Dormant accounts +60 days and never used,10,"9 disabled, 1 active"
+,Accounts without password change +90 days,9,All in disabled accounts
+,Generic accounts,4,"admin, soporte, practica, auditoria"
+,Default accounts,6,Incl. blank full names
+,Disabled accounts,9,
+,Users with multiple accounts,0,
+,Active accounts,42,82.40%
+,Disabled accounts,9,17.60%
+,Total,51,100%
+,Never,0,0.00%
+,Between 0 and 30 days,20,47.60%
+,Between 30 and 60 days,22,52.40%
+,Between 60 and 90 days,0,0.00%
+,Greater than 90 days,0,0.00%
+,Total,42,100%
+,Never,1,2.40%
+,Between 0 and 30 days,41,97.60%
+,Between 30 and 60 days,0,0.00%
+,Between 60 and 90 days,0,0.00%
+,Greater than 90 days,0,0.00%
+,Total,42,100%
+,Never,5,55.60%
+,Between 0 and 30 days,0,0.00%
+,Between 30 and 60 days,0,0.00%
+,Between 60 and 90 days,0,0.00%
+,Between 90 and 365 days,1,11.10%
+,Greater than 365 days,3,33.30%
+,Total,9,100%
+,Findings,0,No accounts with multiple users identified
+,Admin / Administrator - AC_Admins,4,9.5% of 42 active
+,Admin / Administrator - Administrators,1,2.4% of 42 active
+,Admin / Administrator - Domain Admins,1,2.4% of 42 active
+,Admin / Administrator - Enterprise Admins,1,2.4% of 42 active
+,Admin / Administrator - Schema Admins,1,2.4% of 42 active
+,Admin / Administrator - ADSyncAdmins,1,2.4% of 42 active
+,Admin / Administrator - AC Admin Group,1,2.4% of 42 active
+,Admin / Administrator - Exchange Organization Administrators,1,2.4% of 42 active
+,Domain Users - Domain Users,42,100% of 42 active
+,MFA Users - MFAUsers,36,85.7% of 42 active
+,Other Users - AC_Reseteo,9,21.4% of 42 active
+,Other Users - Group Policy Creator Owners,1,2.4% of 42 active
+,Other Users - USR,1,2.4% of 42 active
+,Other Users - Organization Management,1,2.4% of 42 active
+,Other Users - Users,1,2.4% of 42 active
+,Do not require password,2,
+,No login +60 days,0,
+,No password change +90 days,0,
+,Password does not expire,5,
+,Generics,4,
+,Total findings,9,
+,No. users,51,
+,Risk acknowledged,Yes,
+,Action plan,Yes,
+,Risk action covers high priority vulnerabilities,Yes,
+Simulated Opportunity,CIS.5.5 Service account inventory,$0.87m,Simulated CIS.5 value 83.7%
+Simulated Opportunity,CIS.5.1 Account inventory,$0.82m,Simulated CIS.5 value 82.7%
+Simulated Opportunity,CIS.4.7 Manage default accounts,$0.28m,Simulated CIS.4 value 60.3%
+Simulated Opportunity,CIS.15.1 Service provider inventory,$0.06m,Simulated CIS.15 value 57.3%
+Simulated Opportunity,CIS.15.7 Decommission providers,$0.06m,Simulated CIS.15 value 57.3%
+Simulated Opportunity,Total opportunity,$2.07m,Median cyber risk reduction at full implementation
+Recommendations,1. Eliminate the 4 generic accounts,High priority,"admin, soporte, practica, auditoria - drives Extremely High rating and anchors CIS.5.1/CIS.5.5 at 0%"
+Recommendations,2. Remove or rename the 6 default/unnamed accounts,High priority,Lifts CIS.4.7 from 0% (~$0.28m opportunity)
+Recommendations,3. Delete stale disabled accounts,Medium priority,All non-expiring and no-password findings sit in disabled accounts with last logins from never to 2023
+Recommendations,4. Review admintrendmicro,Medium priority,Active admin-group account that has never logged on
+Recommendations,5. Close the MFA gap,Medium priority,36 of 42 active accounts (85.7%) MFA-enrolled; the 6 outside are generic/admin service accounts
+Recommendations,6. Maintain current password hygiene,Ongoing,100% of active passwords rotated within 60 days; keep 60-day expiry policy enforced

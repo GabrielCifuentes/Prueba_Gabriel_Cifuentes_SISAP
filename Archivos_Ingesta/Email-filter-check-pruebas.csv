@@ -1,0 +1,22 @@
+Section,Item,Detail,Score / Value,CIS Alignment
+Report,Report name,Email Filter Check Report,,
+Report,Profile,Pruebas,,
+Report,Report date,"July 07, 2026",,
+Report,Domain,guate.com.gt,,
+Summary metrics,Total cyber risk,"Median scenario, 3.1% of revenue",$32m,
+Summary metrics,EFC risk rating,Driven by 4 Otras extensiones fails,High,
+Summary metrics,Email filter checks score,34 of 38 checks Cumple,89.50%,
+Summary metrics,Secure configuration score,OSINT-calibrated (SPF/DKIM/DMARC absent),25.00%,
+Email filter check results,Open relay,Compliant (OSINT-calibrated),100%,CIS.9.7
+Email filter check results,Sender Policy Framework (SPF),Not compliant (OSINT-calibrated),0%,CIS.9.5
+Email filter check results,Domain-Keys Identified Mail (DKIM),Not compliant (OSINT-calibrated),0%,CIS.9.5
+Email filter check results,Domain-Message Authentication (DMARC),Not compliant (OSINT-calibrated),0%,CIS.9.5
+Email filter check results,Email filter checks,Average across 38 extension checks,89.50%,CIS.9.6 / CIS.14.2
+Email extension checks,Obligatorio (mandatory),"Compliant: 26, Non-compliant: 0",100%,
+Email extension checks,Otras extensiones (other extensions),"Compliant: 8, Non-compliant: 4 (XLSX, PDF, DOCX, PPTX)",66.70%,
+Email extension checks,Justificado (justified),"Compliant: 0, Non-compliant: 0",N/A,
+Recommendations,"1. Deploy SPF, DKIM & DMARC (monitor to reject)",Current safeguard at 0%,"$381,000",CIS.9.5
+Recommendations,2. Strengthen anti-phishing awareness training,Current safeguard at 70%,"$126,000",CIS.14.2
+Recommendations,3. Harden mail server and add DNS filtering / DNSSEC,Current safeguard at 75%,"$95,300",CIS.9.7
+Recommendations,"4. Extend attachment filtering to XLSX, PDF, DOCX, PPTX",Current safeguard at 89%,"$41,900",CIS.9.6
+Recommendations,Total opportunity,Sum of the four simulated opportunities (median scenario),"$644,000",

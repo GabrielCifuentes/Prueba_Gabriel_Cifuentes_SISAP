@@ -1,0 +1,30 @@
+# Credenciales - NUNCA versionar
+credentials/
+*service-account*.json
+*credentials*.json
+*sa-key*.json
+key.json
+*.pem
+*.key
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Documento confidencial del caso (no debe ir a un repo publico)
+2026 - Programas - Evaluacion Practica - Automatizador-v1.pdf
+
+# Salidas generadas
+reports/output/
+*.pdf
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.claude/
